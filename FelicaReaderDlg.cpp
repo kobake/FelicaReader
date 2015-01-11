@@ -1,52 +1,12 @@
-
-// FelicaReaderDlg.cpp : 実装ファイル
-//
-
 #include "stdafx.h"
 #include "FelicaReader.h"
 #include "FelicaReaderDlg.h"
 #include "afxdialogex.h"
+#include "CAboutDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-// アプリケーションのバージョン情報に使われる CAboutDlg ダイアログ
-
-class CAboutDlg : public CDialogEx
-{
-public:
-	CAboutDlg();
-
-// ダイアログ データ
-	enum { IDD = IDD_ABOUTBOX };
-
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
-
-// 実装
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
-{
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
-
-
-// CFelicaReaderDlg ダイアログ
-
-
-
 
 CFelicaReaderDlg::CFelicaReaderDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFelicaReaderDlg::IDD, pParent)
@@ -57,12 +17,14 @@ CFelicaReaderDlg::CFelicaReaderDlg(CWnd* pParent /*=NULL*/)
 void CFelicaReaderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_EDIT1, m_edtInfo);
 }
 
 BEGIN_MESSAGE_MAP(CFelicaReaderDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON1, &CFelicaReaderDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -151,3 +113,10 @@ HCURSOR CFelicaReaderDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CFelicaReaderDlg::OnBnClickedButton1()
+{
+	// FeliCa 情報を読んでみる
+	m_edtInfo.SetWindowText(L"aaa");
+}
