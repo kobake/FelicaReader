@@ -1,0 +1,39 @@
+﻿2015/01/11 22:11:16 にビルドを開始しました。
+     1>ノード 2 上のプロジェクト "C:\Projects\FelicaReader\FelicaReader.vcxproj" (build ターゲット)。
+     1>InitializeBuildStatus:
+         "AlwaysCreate" が指定されたため "Debug\FelicaReader.unsuccessfulbuild" を作成しています。
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Debug\FelicaReader.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\FelicaReader.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt FelicaReader.cpp FelicaReaderDlg.cpp
+         FelicaReaderDlg.cpp
+         FelicaReader.cpp
+         コードを生成中...
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /l"0x0411" /IDebug\ /nologo /fo"Debug\FelicaReader.res" FelicaReader.rc 
+       ManifestResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\FelicaReader.exe.embed.manifest.res" Debug\FelicaReader_manifest.rc 
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Projects\FelicaReader\Debug\FelicaReader.exe" /INCREMENTAL /NOLOGO /MANIFEST /ManifestFile:"Debug\FelicaReader.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Projects\FelicaReader\Debug\FelicaReader.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Projects\FelicaReader\Debug\FelicaReader.lib" /MACHINE:X86 Debug\FelicaReader.res
+         Debug\FelicaReader.exe.embed.manifest.res
+         Debug\FelicaReader.obj
+         Debug\FelicaReaderDlg.obj
+         Debug\stdafx.obj
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\FelicaReader.exe.embed.manifest" /manifest Debug\FelicaReader.exe.intermediate.manifest "c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\Include\Manifest\dpiaware.manifest"
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\FelicaReader.exe.embed.manifest.res" Debug\FelicaReader_manifest.rc 
+       LinkEmbedManifest:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Projects\FelicaReader\Debug\FelicaReader.exe" /INCREMENTAL /NOLOGO /MANIFEST /ManifestFile:"Debug\FelicaReader.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Projects\FelicaReader\Debug\FelicaReader.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Projects\FelicaReader\Debug\FelicaReader.lib" /MACHINE:X86 Debug\FelicaReader.res
+         Debug\FelicaReader.exe.embed.manifest.res
+         Debug\FelicaReader.obj
+         Debug\FelicaReaderDlg.obj
+         Debug\stdafx.obj
+         FelicaReader.vcxproj -> C:\Projects\FelicaReader\Debug\FelicaReader.exe
+       FinalizeBuildStatus:
+         ファイル "Debug\FelicaReader.unsuccessfulbuild" を削除しています。
+         "Debug\FelicaReader.lastbuildstate" のタッチ タスクを実行しています。
+     1>プロジェクト "C:\Projects\FelicaReader\FelicaReader.vcxproj" (build ターゲット) のビルドが完了しました。
+
+ビルドに成功しました。
+
+経過時間 00:00:05.38
