@@ -51,11 +51,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\lib\sdk4nfc_starter201J\NFCAccessLibrary\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\lib\sdk4nfc_starter201J\NFCAccessLibrary\include;$(ProjectDir)\lib\sdk4nfc_starter201J\FeliCa_Library\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib\sdk4nfc_starter201J\NFCAccessLibrary\lib\x86;$(ProjectDir)\lib\sdk4nfc_starter201J\FeliCa_Library\lib\x86</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
