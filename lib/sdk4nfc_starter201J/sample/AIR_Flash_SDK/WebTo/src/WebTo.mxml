@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2009,2010,2011 Sony Corporation -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+	<mx:Button x="10" y="10" label="ブラウザ起動" id="button1" click="buttonClick();"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import com.sony.jp.felica.event.OpenStatusEvent;
+			import com.sony.jp.felica.FeliCaControl;
+
+			import com.sony.jp.felica.MobileFeliCaRequest;
+			import com.sony.jp.felica.MobileFeliCaResponse;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+
+			private var fc:FeliCaControl = new FeliCaControl();
+		
+			private function buttonClick():void
+			{
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				
+				fc.open(10250);
+			}
+			
+			private function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				
+				var request:MobileFeliCaRequest = new MobileFeliCaRequest();
+				request.type = MobileFeliCaRequest.WEBTO;
+				request.url = "http://mobile.sony.jp/";
+				fc.access(request);
+			}
+			
+			private function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"NFC Proxy との相互認証に失敗しました。\n" +
+									"   Error: (" + error.errorID+ ") "  + error.message;
+				mx.controls.Alert.show(msg);
+			}
+			
+			private function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				var response:MobileFeliCaResponse = evt.object as MobileFeliCaResponse;
+				var msg:String =	"ブラウザ起動に成功しました\n" +
+									"   FeliCa Error Code (" + response.felicaError + ")\n" +
+									"   RW Error Code (" + response.rwError + ")\n" +
+									"   NFCProxy Error Code (" + response.felicaProxyError + ")";
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}
+
+			private function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var errorMsg:String;
+				if (evt.object is FeliCaAccessError)
+				{
+					var error1:FeliCaAccessError = evt.object as FeliCaAccessError;
+					errorMsg =	"ERROR: (" + error1.errorID + ")" + error1.message + "\n" +
+								"   FeliCa Error Code (" + error1.felicaError + ")\n" +
+								"   RW Error Code (" + error1.rwError + ")\n" +
+								"   NFCProxy Error Code (" + error1.felicaProxyError + ")";
+				}
+				else if (evt.object is Error) 		
+				{
+					var error2:Error = evt.object as Error;
+					errorMsg =	"ERROR: (" + error2.errorID + ") " + error2.message;
+				}
+				
+				var msg:String =	"ブラウザ起動に失敗しました\n" + errorMsg;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}
+			
+			private function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"ブラウザ起動でエラーが発生しました。\n" +
+									"ERROR: (" + error.errorID + ")" + error.message;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}			
+		]]>
+	</mx:Script>
+</mx:Application>

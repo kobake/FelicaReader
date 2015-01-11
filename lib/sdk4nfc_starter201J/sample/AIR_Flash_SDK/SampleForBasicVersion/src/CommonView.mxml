@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		width="576" height="58"
+		borderStyle="solid" borderColor="0xffffff" 
+		paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" 
+		verticalGap="20" cornerRadius="20" 
+		backgroundAlpha="1.0" backgroundColor="0xffffff">
+	<mx:Button label="NFC Proxy と認証"  height="36" width="131" id="btnNFCProxyAuthentication" click="onNFCProxyAuthentication()"/>
+	<mx:Button label="NFC Proxy と切断"  height="36" id="btnNFCProxyClose" click="onNFCProxyClose()"/>
+	<mx:Button label="R/W 占有"  height="36" width="131" id="btnRwLock" click="onRwLock()"/>
+	<mx:Button label="R/W 解放"  height="36" width="131" id="btnRwUnlock" click="onRwUnlock()"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import com.sony.jp.felica.event.OpenStatusEvent;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.FeliCaSessionRequest;
+			import com.sony.jp.felica.FeliCaSessionResponse;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+		
+			//	NFCProxy のポート番号
+			private static const PORT:int = 10250;
+			
+			//	flash アプリケーションが動作する URL 
+			private static const LOCATION:String = "";
+			
+			private var target:String = "";
+			
+			//	[NFC Proxy と認証] ボタン押下時処理
+			protected function onNFCProxyAuthentication():void
+			{
+				//	リスナー登録
+				this.configureOpenStatusEventListeners(true);
+				
+				//	NFCProxy との相互認証
+				FeliCaSample(parentDocument).fc.open(PORT);
+			}
+			
+			//	[NFC Proxy と切断] ボタン押下時処理
+			protected function onNFCProxyClose():void
+			{
+				if (FeliCaSample(parentDocument).fc.close() == true)
+				{
+					mx.controls.Alert.show("NFCProxy との通信を切断しました。");
+				}
+				else
+				{
+					mx.controls.Alert.show("NFCProxy との通信を切断に失敗しました。");
+				}
+			}
+			
+			//	[R/W 占有] ボタン押下時処理
+			//	自 Flash が RW を占有して使用する場合必要となります。
+			protected function onRwLock():void
+			{
+				this.target = this.btnRwLock.label;
+				
+				//	リスナー登録
+				this.configureFeliCaAccessStatusEventListeners(true);
+				
+				//	リーダ・ライタを占有する為の情報の設定
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();
+				
+				request.type			= FeliCaSessionRequest.HOLD;	// RWを占有したいときは、このプロパティーをセットします。
+				request.lockTimeout		= 10;							// 占有(Lock)するまでのタイムアウト時間(秒)
+				request.unlockTimeout	= 60;							// 占有(Lock)してから解放(Unlock)するまでの見込み時間(秒) 
+																		// NFCProxyは、このunlockTimeout時間経過した場合自動でRW解放を行う。
+				
+				//	リーダ・ライタを占有を実行
+				FeliCaSample(parentDocument).fc.access(request);
+			}
+			
+			//	[R/W 解放] ボタン押下時処理
+			//	RW 占有した場合は必ず解放してください。
+			protected function onRwUnlock():void
+			{
+				this.target = this.btnRwUnlock.label;
+				
+				//	リスナー登録
+				this.configureFeliCaAccessStatusEventListeners(true);
+				
+				//	リーダ・ライタ占有を解放する為の情報の設定
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();
+				
+				request.type = FeliCaSessionRequest.RELEASE;		// RWを解放したいときは、このプロパティーをセットします。
+				
+				//	リーダ・ライタ占有解放を実行
+				FeliCaSample(parentDocument).fc.access(request);
+			}
+			
+			//	NFCProxy との認証完了時
+			protected function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				mx.controls.Alert.show("NFCProxy との相互認証に成功しました。");
+				
+				//	リスナー削除
+				this.configureOpenStatusEventListeners(false);
+			}
+			
+			//	NFCProxy との認証処理でエラー発生時
+			protected function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error	= evt.object as Error;
+				var msg:String	= "NFCProxy との相互認証に失敗しました。\n" +
+								  "   ERROR : (" + error.errorID + ") " + error.message;
+				mx.controls.Alert.show(msg);
+				
+				//	リスナー削除
+				this.configureOpenStatusEventListeners(false);
+			}
+			
+			//	FeliCa アクセス完了時
+			protected function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				var response:FeliCaSessionResponse = evt.object as FeliCaSessionResponse;
+				var msg:String = (response.type == FeliCaSessionResponse.HOLD) ? "R/W 占有に成功しました。" : "R/W 解放に成功しました。";
+				
+				/*
+				msg += "\n";
+				msg += "  felica error = " + response.felicaError.toString() + "\n";
+				msg += "  rw error     = " + response.rwError.toString() + "\n";
+				msg += "  proxy error  = " + response.felicaProxyError.toString();
+				*/
+				
+				mx.controls.Alert.show(msg);
+				
+				//	リスナー削除
+				this.configureFeliCaAccessStatusEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行失敗時
+			protected function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var msg:String = this.target + "に失敗しました。";
+				if (evt.object is FeliCaAccessError)
+				{
+					var accessErr:FeliCaAccessError = evt.object as FeliCaAccessError;
+					
+					msg += "\n";
+					msg += "  ERROR : (" + accessErr.errorID + ") " + accessErr.message + "\n";
+					msg += "  felica error = " + accessErr.felicaError.toString() + "\n";
+					msg += "  rw error     = " + accessErr.rwError.toString() + "\n";
+					msg += "  proxy error  = " + accessErr.felicaProxyError.toString();
+				}
+				else if (evt.object is Error)
+				{
+					var error:Error = evt.object as Error;
+					
+					msg += "\n";
+					msg += "  ERROR : (" + error.errorID + ") " + error.message;
+				}
+				
+				mx.controls.Alert.show(msg);
+				
+				//	リスナー削除
+				this.configureFeliCaAccessStatusEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行時のパラメータエラー発生時
+			protected function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var msg:String = this.target + "でエラーが発生しました。";
+				
+				var error:Error = evt.object as Error;
+				msg += "\n";
+				msg += "  ERROR : (" + error.errorID + ") " + error.message;
+				
+				mx.controls.Alert.show(msg);
+				
+				//	リスナー削除
+				this.configureFeliCaAccessStatusEventListeners(false);
+			}
+			
+			//	NFCProxy との相互認証で使用するイベントリスナーの登録・削除
+			private function configureOpenStatusEventListeners(addFlag:Boolean):void
+			{
+				if (addFlag == true)
+				{
+					//	リスナー登録
+					FeliCaSample(parentDocument).fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+					FeliCaSample(parentDocument).fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				}
+				else
+				{
+					//	リスナー削除
+					FeliCaSample(parentDocument).fc.removeEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+					FeliCaSample(parentDocument).fc.removeEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				}
+				
+				//	画面の使用可・不可の設定
+				FeliCaSample(parentDocument).enabled = (addFlag == true) ? false : true;
+			}
+			
+			//	FeliCa アクセスで使用するイベントリスナーの登録・削除
+			private function configureFeliCaAccessStatusEventListeners(addFlag:Boolean):void
+			{
+				if (addFlag == true)
+				{
+					//	リスナー登録
+					FeliCaSample(parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				else
+				{
+					//	リスナー削除
+					FeliCaSample(parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				
+				//	画面の使用可・不可の設定
+				FeliCaSample(parentDocument).enabled = (addFlag == true) ? false : true;
+			}
+			
+			
+			
+			
+		]]>
+	</mx:Script>
+</mx:HBox>
+

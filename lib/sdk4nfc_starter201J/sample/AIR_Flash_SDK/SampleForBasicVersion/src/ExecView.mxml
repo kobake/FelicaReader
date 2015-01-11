@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="776" height="384" xmlns:view="execView.*" creationComplete="init()">
+	<mx:ComboBox x="10" y="10" width="203" id="cmbType" change="createAPIList(cmbType.value.toString())">
+		<mx:dataProvider>
+			<mx:Array>
+				<mx:String>Mobile Access</mx:String>	
+				<mx:String>NDEFTag Access</mx:String>
+				<mx:String>FeliCa Access</mx:String>
+			</mx:Array>
+		</mx:dataProvider>
+	</mx:ComboBox>
+	<mx:ComboBox x="10" y="40" width="203" id="cmbAPI" change="createFunctionList(cmbAPI.value.toString())"/>
+	<mx:List x="10" y="70" width="203" height="271" id="lstFunction" change="showExecView(lstFunction.value.toString())" />
+	<mx:ViewStack x="221" y="10" id="execFunctionView">
+		<!-- Mobile Access (0 to 5) -->
+		<view:MobileRead/>
+		<view:MobileWrite />
+		<view:iAppliExecute />
+		<view:BrowserExecute />
+		<view:MobileReadAndiAppliExecute />
+		<view:MobileWriteAndiAppliExecute />
+
+		<!-- NDEFTag Access (6 to 11) -->
+		<view:NFCType2TagRead />		
+		<view:NFCType2TagWrite />		
+		<view:NFCType3TagRead />
+		<view:NFCType3TagWrite />
+		<view:NFCType4TagRead />
+		<view:NFCType4TagWrite />
+
+		<!-- リーダ／ライタ制御関係のAPI (12 to 13) -->
+		<view:OpenReaderWriterAuto />
+		<view:CloseReaderWriter />
+		
+		<!-- カードの通常コマンドAPI (14 to 15) -->
+		<view:PollingAndGetCardInformation />
+		<view:GetContainerIssueInformation />
+
+	</mx:ViewStack>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Container;
+		
+			//	初期化完了時に呼ばれる
+			private function init():void
+			{
+				cmbType.selectedIndex = 0;
+				createAPIList(cmbType.value.toString());
+			}
+			
+			//	コンボボックス(id=cmbFunction)のリストを生成
+			//		コンボボックス(id=cmbType) 変更時処理に呼ばれる
+			private function createAPIList(api:String):void
+			{
+				var list:Array = new Array();
+				
+				cmbAPI.enabled = true;
+				if (api == "Mobile Access")
+				{
+					list.push("Mobile Access");
+				}
+				else if (api == "NDEFTag Access")
+				{
+					list.push("NDEFTag Access");
+				}
+				else if (api == "FeliCa Access")
+				{
+					list.push("リーダ／ライタ制御関係のAPI");
+					list.push("カードの通常コマンドAPI");
+				}
+				
+				//	コンボボックスの dataProvider 属性に API リストをセット
+				cmbAPI.dataProvider = list;
+				
+				//	リストボックスをリセット
+				if (list.length > 0)
+				{
+					cmbAPI.selectedIndex	= 0;
+					cmbAPI.enabled			= (list.length == 1) ? false : true;
+					createFunctionList(cmbAPI.value.toString());
+				}
+			}
+			
+			//	リストボックスのリストを生成
+			//		コンボボックス(id=cmbAPI) 変更時処理に呼ばれる
+			private function createFunctionList(func:String):void
+			{			
+				var list:Array		= new Array();
+				var functions:Array	= execFunctionView.getChildren();
+				var start:int		= 0;
+				var end:int			= 0;
+				
+				switch(func)
+				{
+					case "Mobile Access"							:	start = 0;	end = 5;	break;
+					case "NDEFTag Access"							:	start = 6;	end = 11;	break;
+					case "リーダ／ライタ制御関係のAPI"			:	start = 12;	end = 13;	break;
+					case "カードの通常コマンドAPI"				:	start = 14;	end = 15;	break;
+				}
+				
+				for (var i:int = start; i <= end; i++)
+				{
+					list.push(functions[i]);
+				}
+				
+				//	リストボックスの dataProvider 属性に関数リストをセット
+				lstFunction.dataProvider = list;
+				
+				if (list.length > 0)
+				{
+					lstFunction.selectedIndex = 0;
+					showExecView(lstFunction.value.toString());
+				}
+			}
+			
+			//	実行画面の表示
+			//		リストボックス変更時処理
+			private function showExecView(viewName:String):void
+			{
+				//trace(viewName);
+				
+				var functions:Array = execFunctionView.getChildren();
+				for (var index:String in functions)
+				{
+					if (functions[index].label == viewName)
+					{
+						execFunctionView.selectedIndex = parseInt(index);
+						break;
+					}
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

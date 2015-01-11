@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" label="iアプリ起動" width="545" height="354" backgroundColor="#FFFFFF">
+	<!-- 設定用テキストインプット -->
+	<mx:Label x="10" y="10" text="URL"/>
+	<mx:TextInput x="51" y="8" text="http://www.felicalauncher.com/sdk4air/iAppli/Demo.jam" id="txtURL" editable="true" width="484"/>
+	<mx:Label x="11" y="36" text="ADF"/>
+	<mx:TextInput x="51" y="34" text="010001" id="txtADF" width="121" editable="true" textAlign="right"/>
+	<mx:Button x="289" y="34" label="実行" id="btnExecute" click="onExecute()" width="85"/>
+	
+	<mx:HRule x="0" y="62" width="100%"/>
+	
+	<!-- 実行結果表示用 -->
+	<mx:HBox x="10" y="72" width="525">
+		<mx:Label text="felica error code" width="96"/>
+		<mx:TextArea height="19" width="36" textAlign="right" id="txtFeliCaErrorCode" editable="false" wordWrap="false"/>
+		<mx:Label text="rw error code"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtRWErrorCode" wordWrap="false" editable="false"/>
+		<mx:Label text="NFC Proxy error code" width="133"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtNFCProxyErrorCode" wordWrap="false" editable="false"/>
+	</mx:HBox>
+	
+	<!-- ログ表示用 -->
+	<mx:VBox x="10" y="99" height="245" width="525">
+		<mx:Label text="Log"/>
+		<mx:TextArea width="100%" height="206" id="txtLogArea" editable="false" />
+	</mx:VBox>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.MobileFeliCaRequest;
+			import com.sony.jp.felica.MobileFeliCaResponse;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			//	[実行] ボタン押下時処理
+			protected function onExecute():void
+			{
+				//	実行結果の情報をクリア
+				this.txtFeliCaErrorCode.text		= "";
+				this.txtRWErrorCode.text			= "";
+				this.txtNFCProxyErrorCode.text	= "";
+				
+				//	リスナーの登録
+				this.configureEventListeners(true);				
+				
+				//	携帯電話の iアプリを起動する為の情報の設定
+				var request:MobileFeliCaRequest = new MobileFeliCaRequest();
+				
+				request.type	= MobileFeliCaRequest.IAPPLI;	// おサイフケータイにダウンロードされている iAppli を起動するためのプロパティー設定
+				request.url		= this.txtURL.text;				// iAppli のダウンロード元URL 例： http://www.raisys.co.jp/prj/sdk4air/iAppli/Demo.jam
+				request.adf		= this.txtADF.text;				// iAppli 作成時 ADF 設定画面の AllowPushBy で指定した値(icc:は除く)　例：010001
+				
+				//	ログの表示
+				this.displayMessage("iアプリ起動を実行します。");					
+				this.displayMessage("  url  = " + request.url);
+				this.displayMessage("  adf  = " + request.adf);
+				
+				//	携帯電話の iアプリを起動
+				FeliCaSample(parentDocument.parentDocument).fc.access(request);
+			}
+			
+			//	FeliCa アクセス完了時
+			protected function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				var response:MobileFeliCaResponse = evt.object as MobileFeliCaResponse;
+				
+				//	エラーコードの表示
+				this.txtFeliCaErrorCode.text		= response.felicaError.toString();		// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+				this.txtRWErrorCode.text			= response.rwError.toString();			// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+				this.txtNFCProxyErrorCode.text	= response.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+				
+				//	ログの表示
+				this.displayMessage("iアプリ起動に成功しました。");
+				this.displayMessage("  felica error = " + response.felicaError.toString());
+				this.displayMessage("  rw error = " + response.rwError.toString());
+				this.displayMessage("  proxy error = " + response.felicaProxyError.toString());
+				
+				//	リスナーの削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行失敗時
+			protected function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is FeliCaAccessError)
+				{
+					var accessErr:FeliCaAccessError = evt.object as FeliCaAccessError;
+					
+					//	エラーコードの表示
+					this.txtFeliCaErrorCode.text		= accessErr.felicaError.toString();			// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+					this.txtRWErrorCode.text			= accessErr.rwError.toString();				// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+					this.txtNFCProxyErrorCode.text	= accessErr.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+					
+					//	ログの表示
+					this.displayMessage("iアプリ起動に失敗しました。");
+					this.displayMessage("  ERROR : (" + accessErr.errorID + ") " + accessErr.message);
+					this.displayMessage("  felica error = " + accessErr.felicaError.toString());
+					this.displayMessage("  rw error     = " + accessErr.rwError.toString());
+					this.displayMessage("  proxy error  = " + accessErr.felicaProxyError.toString());
+				}
+				else if (evt.object is Error)
+				{
+					var error:Error = evt.object as Error;
+					
+					//	ログの表示
+					this.displayMessage("iアプリ起動に失敗しました。");
+					this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				}
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行時のパラメータエラー発生時
+			protected function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				
+				//	ログの表示
+				this.displayMessage("iアプリ起動でエラーが発生しました。");
+				this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセスで使用するイベントリスナーの登録・削除
+			private function configureEventListeners(addFlag:Boolean):void
+			{
+				if (addFlag == true)
+				{
+					//	リスナー登録
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				else
+				{
+					//	リスナー削除
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				
+				//	画面の使用可・不可の設定
+				FeliCaSample(parentDocument.parentDocument).enabled = (addFlag == true) ? false : true;
+			}
+			
+			//	ログの表示
+			private function displayMessage(msg:String):void
+			{
+				this.txtLogArea.text += msg;
+				this.txtLogArea.text += "\n";
+				
+				this.callLater(setScroll);	//	一番下にスクロールさせる
+			}
+			
+			//	ログエリアを一番下にスクロールさせる
+			private function setScroll():void
+			{
+				this.txtLogArea.verticalScrollPosition = this.txtLogArea.maxVerticalScrollPosition;
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

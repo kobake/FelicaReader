@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2009,2010,2011 Sony Corporation -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+	<mx:Button x="10" y="10" label="Start" click="buttonClick()"/>
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.FeliCaControl;
+			import com.sony.jp.felica.NFCType3TagRequest;
+			import com.sony.jp.felica.NFCType3TagResponse;
+			import com.sony.jp.felica.event.OpenStatusEvent;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			private var fc:FeliCaControl = new FeliCaControl;
+
+			private function buttonClick():void
+			{
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				
+				fc.open(10250);
+			}
+			
+			private function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				
+				NFCType3TagRead();
+			}
+
+			private function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"Failed to connect with NFC Proxy Service\n" +
+									"   Error: (" + error.errorID+ ") "  + error.message;
+				mx.controls.Alert.show(msg);
+			}
+									
+			private function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is NFCType3TagResponse)
+				{
+					var response:NFCType3TagResponse = evt.object as NFCType3TagResponse;
+					
+					if (response.type == NFCType3TagResponse.READ)
+					{
+						trace("response data : " + response.data);
+						
+						NFCType3TagWrite();
+					}
+					if (response.type == NFCType3TagResponse.WRITE)
+					{
+						fc.close();
+					}
+
+				}
+			}
+
+			private function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var errorMsg:String;
+				if (evt.object is FeliCaAccessError)
+				{
+					var error1:FeliCaAccessError = evt.object as FeliCaAccessError;
+					errorMsg =	"ERROR: (" + error1.errorID + ")" + error1.message + "\n" +
+								"   FeliCa Error Code (" + error1.felicaError + ")\n" +
+								"   RW Error Code (" + error1.rwError + ")\n" +
+								"   NFCProxy Error Code (" + error1.felicaProxyError + ")";
+				}
+				else if (evt.object is Error) 		
+				{
+					var error2:Error = evt.object as Error;
+					errorMsg =	"ERROR: (" + error2.errorID + ") " + error2.message;
+				}
+				
+				var msg:String =	"Failed to access the NFC Device \n" + errorMsg;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}
+			
+			private function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"Failed to access the NFC Device \n" +
+									"ERROR: (" + error.errorID + ")" + error.message;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}	
+			
+			private function NFCType3TagRead():void
+			{
+				var request:NFCType3TagRequest = new NFCType3TagRequest();
+				request.type = NFCType3TagRequest.READ;	
+				fc.access(request);
+			}
+
+			private function NFCType3TagWrite():void
+			{
+				var request:NFCType3TagRequest = new NFCType3TagRequest();
+				
+				request.type = NFCType3TagRequest.WRITE;
+				var data:ByteArray = new ByteArray();
+				data.writeUTFBytes("Sample Application ....");				
+				request.data = bytesToString(data);
+				fc.access(request);
+			}
+			
+			private function bytesToString(data:ByteArray):String
+			{
+				var result:String = "";
+				var temp:String;
+				
+				for (var i:uint = 0; i < data.length; i++)
+				{
+					temp = data[i].toString(16);
+					if (temp.length != 2)
+					{
+						temp = "0" + temp;
+					}
+					result += temp;
+				}
+				return	result;
+			}
+
+		]]>
+	</mx:Script>
+</mx:Application>

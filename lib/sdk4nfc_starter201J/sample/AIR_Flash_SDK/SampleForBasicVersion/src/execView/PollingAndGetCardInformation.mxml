@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" label="PollingAndGetCardInformation" width="545" height="354" backgroundColor="#FFFFFF">
+	<!-- 設定用テキストインプット -->
+	<mx:Label x="10" y="10" text="システムコード" fontSize="10"/>
+	<mx:TextInput x="85" y="8" maxChars="4" text="FFFF" fontSize="10" width="52" id="txtSystemCode" restrict="0-9A-F"/>
+	<mx:Button x="145" y="8" label="実行" id="btnExecute" click="onExecute()" width="85"/>
+	
+	<mx:HRule x="0" y="36" width="100%"/>
+	
+	<!-- 実行結果表示用 -->
+	<mx:Label x="10" y="48" text="Number of Cards"/>
+	<mx:TextArea x="117" y="47" height="19" editable="false" id="txtNumberOfCards" width="38" textAlign="right"/>
+	<mx:Label x="10" y="75" text="IDm"/>
+	<mx:TextArea x="47" y="74" height="19" editable="false" id="txtIDm" width="168"/>
+	<mx:Label x="223" y="75" text="PMm"/>
+	<mx:TextArea x="260" y="74" height="19" editable="false" id="txtPMm" width="168"/>
+	
+	<mx:HBox x="10" y="100" width="525">
+		<mx:Label text="felica error code" width="96"/>
+		<mx:TextArea height="19" width="36" textAlign="right" id="txtFeliCaErrorCode" editable="false" wordWrap="false"/>
+		<mx:Label text="rw error code"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtRWErrorCode" wordWrap="false" editable="false"/>
+		<mx:Label text="NFC Proxy error code" width="133"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtNFCProxyErrorCode" wordWrap="false" editable="false"/>
+	</mx:HBox>
+	
+	<!-- ログ表示用 -->
+	<mx:VBox x="10" y="127" height="217" width="525">
+		<mx:Label text="Log"/>
+		<mx:TextArea width="100%" height="190" id="txtLogArea" editable="false" />
+	</mx:VBox>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.FeliCaPollingAndGetCardInformationRequest;
+			import com.sony.jp.felica.FeliCaPollingAndGetCardInformationResponse;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			
+			//	[実行] ボタン押下時処理
+			protected function onExecute():void
+			{
+				//	実行結果の情報をクリア
+				this.txtNumberOfCards.text			= "";
+				this.txtIDm.text					= "";
+				this.txtPMm.text					= "";
+				this.txtFeliCaErrorCode.text		= "";
+				this.txtRWErrorCode.text			= "";
+				this.txtNFCProxyErrorCode.text	= "";
+				
+				//	リスナーの登録
+				this.configureEventListeners(true);
+				
+				// 
+				// SDK for FeliCa : コマンド polling_and_get_card_information()
+				//
+				//	[polling_and_get_card_information] コマンドを実行する為の情報の設定
+				var request:FeliCaPollingAndGetCardInformationRequest = new FeliCaPollingAndGetCardInformationRequest();
+				
+				request.systemCode	= this.txtSystemCode.text;		// ポーリングするシステムコード 例：FE00
+				
+				//	ログの表示
+				this.displayMessage("polling_and_get_card_information を実行します。");
+				this.displayMessage("  system code    = " + request.systemCode);
+				
+				//	[polling_and_get_card_information] コマンドを実行
+				FeliCaSample(parentDocument.parentDocument).fc.access(request);
+			}
+			
+			//	FeliCa アクセス完了時
+			protected function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				var response:FeliCaPollingAndGetCardInformationResponse = evt.object as FeliCaPollingAndGetCardInformationResponse;
+				
+				//	捕捉したカードの枚数, idm, pmm の表示
+				this.txtNumberOfCards.text	= response.numberOfCards.toString();
+				this.txtIDm.text			= response.idm;
+				this.txtPMm.text			= response.pmm;
+				
+				//	エラーコードの表示
+				this.txtFeliCaErrorCode.text		= response.felicaError.toString();		// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+				this.txtRWErrorCode.text			= response.rwError.toString();			// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+				this.txtNFCProxyErrorCode.text	= response.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+				
+				//	ログの表示
+				this.displayMessage("polling_and_get_card_information に成功しました。");
+				this.displayMessage("  number of cards  = " + response.numberOfCards.toString());
+				this.displayMessage("  idm = " + response.idm);
+				this.displayMessage("  pmm = " + response.pmm);
+				this.displayMessage("  felica error = " + response.felicaError.toString());
+				this.displayMessage("  rw error = " + response.rwError.toString());
+				this.displayMessage("  proxy error = " + response.felicaProxyError.toString());
+				
+				//	リスナーの削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行失敗時
+			protected function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is FeliCaAccessError)
+				{
+					var accessErr:FeliCaAccessError = evt.object as FeliCaAccessError;
+					
+					//	エラーコードの表示
+					this.txtFeliCaErrorCode.text		= accessErr.felicaError.toString();		// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+					this.txtRWErrorCode.text			= accessErr.rwError.toString();			// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+					this.txtNFCProxyErrorCode.text	= accessErr.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+					
+					//	ログの表示
+					this.displayMessage("polling_and_get_card_information に失敗しました。");
+					this.displayMessage("  ERROR : (" + accessErr.errorID + ") " + accessErr.message);
+					this.displayMessage("  felica error = " + accessErr.felicaError.toString());
+					this.displayMessage("  rw error     = " + accessErr.rwError.toString());
+					this.displayMessage("  proxy error  = " + accessErr.felicaProxyError.toString());
+				}
+				else if (evt.object is Error)
+				{
+					var error:Error = evt.object as Error;
+					
+					//	ログの表示
+					this.displayMessage("polling_and_get_card_information に失敗しました。");
+					this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				}
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行時のパラメータエラー発生時
+			protected function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				
+				//	ログの表示
+				this.displayMessage("polling_and_get_card_information でエラーが発生しました。");
+				this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセスで使用するイベントリスナーの登録・削除
+			private function configureEventListeners(addFlag:Boolean):void
+			{
+				if (addFlag == true)
+				{
+					//	リスナー登録
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				else
+				{
+					//	リスナー削除
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				
+				//	画面の使用可・不可の設定
+				FeliCaSample(parentDocument.parentDocument).enabled = (addFlag == true) ? false : true;
+			}
+			
+			//	ログの表示
+			private function displayMessage(msg:String):void
+			{
+				this.txtLogArea.text += msg;
+				this.txtLogArea.text += "\n";
+				
+				this.callLater(setScroll);	//	一番下にスクロールさせる
+			}
+			
+			//	ログエリアを一番下にスクロールさせる
+			private function setScroll():void
+			{
+				this.txtLogArea.verticalScrollPosition = this.txtLogArea.maxVerticalScrollPosition;
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

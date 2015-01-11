@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>SampleForBasicVersion sample program</title>
+  <style type="text/css">
+    a:active  { color: #003333}
+    a:hover   { color: #003333}
+    a:link    { color: #003333}
+    a:visited { color: #003333}
+  
+    body { background-color: #FFFFFF; font-family: Arial, Helvetica, sans-serif;
+         border-top-width: 5px; border-right-width: 5px;
+         border-bottom-width: 5px; border-left-width: 15px;
+         font-size: 14px; }
+    h1 { font-family: Arial, Helvetica, sans-serif; border-bottom:solid thin black;
+       color: #003366; padding-top: 25px; padding-bottom: 25px }
+    h2 { font-family: Arial, Helvetica, sans-serif; padding-top: 25px; color: #003399; }
+    h3 { font-family: Arial, Helvetica, sans-serif }
+    h4 { font-family: Arial, Helvetica, sans-serif }
+    li { font-family: Arial, Helvetica, sans-serif; padding-bottom: 5px}
+    address { background-color: #FFFFFF }
+    code { color: #003366; font-weight: bold;}
+  </style>
+</head>
+
+<body>
+  <h1>SampleForBasicVersion サンプルプログラム - README</h1>
+
+  <h2>このプログラムについて</h2>
+
+  <p><b>SampleForBasicVersion</b> は本SDKの各APIを手動で実行するサンプルプログラムです。</p>
+
+  <h2>ビルド方法</h2>
+  <p>Flash Builder 4 (Flex Builder 3) および、コマンドラインでのビルド方法を説明します。</p>
+  <h3>準備(共通)</h3>
+  <ol>
+    <li>本SDKの <b>lib</b> ディレクトリ内にある <b>SDKforAIR_Flash_Basic.swc</b>を、このreadmeファイルがあるディレクトリの <b>libs</b> ディレクトリ内にコピーしてください。</li>
+  </ol>
+
+  <h3>Flash Builder 4 (Flex Builder 3)</h3>
+  <ol>
+    <li>「準備(共通)」の手順を行います。</li>
+    <li>このファイルがあるディレクトリを Flash Builder プロジェクト(Flex Builder 3 の場合、Flex プロジェクト)としてインポートしてください。</li>
+
+    <li>その後、Flash Builder 4 上でのビルド、実行が可能です。</li>
+  </ol>
+  <h3>コマンドライン</h3>
+  <ol>
+    <li>「準備(共通)」の手順を行います。</li>
+    <li>Flex SDK をインストールし、Flex SDK インストールディレクトリ内の <b>bin</b> フォルダをPATH環境変数に指定してください。</li>
+    <li><b>build.bat</b> ファイルを実行してください。<b>bin-debug</b> ディレクトリ内にswfファイルが生成されます。</li>
+  </ol>
+  <h2>実行方法</h2>
+  <p>インターネットブラウザ上で生成されたswfファイルを開きます。プログラム画面左側のドロップダウンリストから機能を選んで、必要な項目を入力し「実行」ボタンを押すことでAPIを呼び出すことができます。例えば、リーダー／ライターに置かれた FeliCa カードに対してPollingを行うには以下の手順で操作します。
+    <ol>
+      <li>「NFC Proxy と認証」ボタンを押す。</li>
+      <li>ドロップダウンリストから「FeliCa Access」、「リーダー／ライタ制御関係のAPI」を選択し、表示されたAPI一覧から「OpenReaderWriterAuto」を選択します。画面右側の「実行」ボタンを押します。</li>
+      <li>ドロップダウンリストから「FeliCa Access」、「カードの通常コマンドAPI」を選択し、表示されたAPI一覧から「PollingAndGetCardInformation」を選択します。画面右側の「実行」ボタンを押します。</li>
+      </ol>
+  <hr>
+  <p>Copyright 2010,2011 Sony Corporation</p>
+</body>
+</html>

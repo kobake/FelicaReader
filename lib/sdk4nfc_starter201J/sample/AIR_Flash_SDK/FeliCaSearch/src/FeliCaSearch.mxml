@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2009,2010,2011 Sony Corporation -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+	<mx:Button x="10" y="10" label="Start Polling" id="button1" click="buttonClick();"/>
+	<mx:TextArea x="10" y="40" width="581" height="310" id="textArea1" editable="false"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.FeliCaControl;
+
+			import com.sony.jp.felica.FeliCaOpenReaderWriterAutoRequest;
+			import com.sony.jp.felica.FeliCaOpenReaderWriterAutoResponse;
+			import com.sony.jp.felica.FeliCaPollingAndGetCardInformationRequest;
+			import com.sony.jp.felica.FeliCaPollingAndGetCardInformationResponse;
+			import com.sony.jp.felica.FeliCaCloseReaderWriterRequest;
+			import com.sony.jp.felica.FeliCaCloseReaderWriterResponse;
+			
+			import com.sony.jp.felica.event.OpenStatusEvent;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			private var fc:FeliCaControl = new FeliCaControl();
+			
+			private function buttonClick():void
+			{
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);		
+
+				fc.open(10250);
+			}
+			
+			private function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				
+				RwOpen();
+			}
+
+			private function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error	=	evt.object as Error;
+				displayMessage(	"Failure: could not connect to NFCProxy\n" +
+								"   ERROR : (" + error.errorID + ") " + error.message);
+			}
+
+			private function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is FeliCaOpenReaderWriterAutoResponse)
+				{
+					displayMessage("Opened Reader/Writer");
+					Polling();
+				}
+				else if (evt.object is FeliCaPollingAndGetCardInformationResponse)
+				{
+					var response:FeliCaPollingAndGetCardInformationResponse = evt.object as FeliCaPollingAndGetCardInformationResponse;
+					displayMessage(	"Found FeliCa \n" +
+											"  idm = " + response.idm + "\n" +
+											"  pmm = " + response.pmm);
+					RwClose();	
+				}
+				else if (evt.object is FeliCaCloseReaderWriterResponse)
+				{
+					displayMessage("Closed Reader/Writer");
+					NFCProxyClose();
+				}
+			}
+		
+			private function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var errorMsg:String;
+				if (evt.object is FeliCaAccessError)
+				{
+					var error1:FeliCaAccessError = evt.object as FeliCaAccessError;
+					errorMsg =	"   ERROR: (" + error1.errorID + ")" + error1.message + "\n" +
+								"     FeliCa Error Code (" + error1.felicaError + ")\n" +
+								"     RW Error Code (" + error1.rwError + ")\n" +
+								"     NFCProxy Error Code (" + error1.felicaProxyError + ")";  
+				}
+				else if (evt.object is Error)
+				{
+					var error2:Error = evt.object as Error;
+					errorMsg = "   ERROR : (" + error2.errorID + ") " + error2.message;
+				}
+				
+				displayMessage("Failure: FeliCa Access Error\n" + errorMsg);
+
+				NFCProxyClose();
+			}
+
+			private function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error	= evt.object as Error;
+				displayMessage(	"Failure: Parameter Error\n" +
+										"   ERROR: (" + error.errorID + ")");
+
+				NFCProxyClose();
+			}
+
+
+			private function RwOpen():void
+			{
+				fc.access(new FeliCaOpenReaderWriterAutoRequest());
+			}
+
+			private function Polling():void
+			{
+				var request:FeliCaPollingAndGetCardInformationRequest = new FeliCaPollingAndGetCardInformationRequest();		
+				request.systemCode	= "FFFF";
+				fc.access(request);
+			}
+
+			private function RwClose():void
+			{
+				fc.access(new FeliCaCloseReaderWriterRequest());
+			}
+
+			
+			private function NFCProxyClose():void
+			{
+				if (fc.close() == true)
+				{
+					displayMessage("Disconnected from NFCProxy");
+				}
+				else
+				{
+					displayMessage("Failure: Could not disconnect from NFCProxy");
+				}
+			}
+			
+			private function displayMessage(msg:String):void
+			{
+				textArea1.text += msg;
+				textArea1.text += "\n";
+				
+				this.callLater(setScroll);
+			}
+
+			private function setScroll():void
+			{
+				textArea1.verticalScrollPosition = textArea1.maxVerticalScrollPosition;
+			}
+		]]>
+	</mx:Script>
+	
+</mx:Application>

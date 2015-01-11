@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2009,2010,2011 Sony Corporation -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+	<mx:Button x="10" y="10" label="Start" click="buttonClick()"/>
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.FeliCaControl;
+			import com.sony.jp.felica.FeliCaSessionRequest;
+			import com.sony.jp.felica.FeliCaSessionResponse;
+			import com.sony.jp.felica.MobileFeliCaRequest;
+			import com.sony.jp.felica.MobileFeliCaResponse;
+			import com.sony.jp.felica.event.OpenStatusEvent;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			private var fc:FeliCaControl = new FeliCaControl();
+
+			private function buttonClick():void
+			{
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				
+				fc.open(10250);
+			}
+			
+			private function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				
+				RwLock();
+			}
+
+			private function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"NFC Proxy との相互認証に失敗しました。\n" +
+									"   Error: (" + error.errorID+ ") "  + error.message;
+				mx.controls.Alert.show(msg);
+			}
+									
+			private function RwLock():void
+			{
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();
+				
+				request.type			= FeliCaSessionRequest.HOLD;
+				request.lockTimeout	= 10;
+				request.unlockTimeout	= 60;
+				fc.access(request);
+			}
+
+			private function MobileRead():void
+			{
+				var request:MobileFeliCaRequest = new MobileFeliCaRequest();
+				
+				request.type	= MobileFeliCaRequest.READ;	
+				request.cpid	= "AD4D5DB9B91C41DC933E79C81AAFDB3B";	
+				request.pin	= "12345678";	
+
+				fc.access(request);
+			}
+
+			private function WebTo():void
+			{
+				var request:MobileFeliCaRequest = new MobileFeliCaRequest();
+				
+				request.type	= MobileFeliCaRequest.WEBTO;
+				request.url	= "http://mobile.sony.jp/";	
+			
+				fc.access(request);
+			}
+
+			private function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is FeliCaSessionResponse)
+				{
+					var session:FeliCaSessionResponse = evt.object as FeliCaSessionResponse;
+					
+					if (session.type == FeliCaSessionResponse.HOLD)
+					{
+						MobileRead();
+					}
+					if (session.type == FeliCaSessionResponse.RELEASE)
+					{
+						fc.close();
+					}
+				}
+				if (evt.object is MobileFeliCaResponse) {
+					var response:MobileFeliCaResponse = evt.object as MobileFeliCaResponse;
+					
+					if (response.type == MobileFeliCaResponse.READ)
+					{
+						trace("読み込みデータ");
+						trace(response.data);
+						
+						WebTo();
+					}
+					if (response.type == MobileFeliCaResponse.WEBTO)
+					{
+						RwUnlock();	
+					}
+				}
+
+			}
+
+			private function RwUnlock():void
+			{
+
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();		
+				request.type	= FeliCaSessionRequest.RELEASE;
+				fc.access(request);
+			}
+			
+			private function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var errorMsg:String;
+				if (evt.object is FeliCaAccessError)
+				{
+					var error1:FeliCaAccessError = evt.object as FeliCaAccessError;
+					errorMsg =	"ERROR: (" + error1.errorID + ")" + error1.message + "\n" +
+								"   FeliCa Error Code (" + error1.felicaError + ")\n" +
+								"   RW Error Code (" + error1.rwError + ")\n" +
+								"   NFCProxy Error Code (" + error1.felicaProxyError + ")";
+				}
+				else if (evt.object is Error) 		
+				{
+					var error2:Error = evt.object as Error;
+					errorMsg =	"ERROR: (" + error2.errorID + ") " + error2.message;
+				}
+				
+				var msg:String =	"FeliCaへのアクセスに失敗しました\n" + errorMsg;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}
+			
+			private function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				var msg:String =	"FeliCaへのアクセスでエラーが発生しました。\n" +
+									"ERROR: (" + error.errorID + ")" + error.message;
+				mx.controls.Alert.show(msg);
+				
+				fc.close();
+			}	
+		]]>
+	</mx:Script>
+</mx:Application>

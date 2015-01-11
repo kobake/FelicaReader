@@ -1,0 +1,406 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="../../../../style.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../../../../print.css" type="text/css" media="print">
+<meta content="MobileFeliCaRequest,com.sony.jp.felica.MobileFeliCaRequest,IAPPLI,READ,READ_WITH_IAAPLI,WEBTO,WRITE,WRITE_WITH_IAPPLI,adf,cpid,data,pin,type,url" name="keywords">
+<title>com.sony.jp.felica.MobileFeliCaRequest</title>
+</head>
+<body>
+<script type="text/javascript" language="javascript" src="../../../../asdoc.js"></script><script type="text/javascript" language="javascript" src="../../../../cookies.js"></script><script type="text/javascript" language="javascript">
+<!--
+				asdocTitle = 'MobileFeliCaRequest - SDK for NFC and Adobe AIR / Adobe Flash';
+				var baseRef = '../../../../';
+				window.onload = configPage;
+			--></script>
+<table style="display:none" id="titleTable" cellspacing="0" cellpadding="0" class="titleTable">
+<tr>
+<td align="left" class="titleTableTitle">SDK for NFC and Adobe AIR / Adobe Flash Basic API Documentation (Version 1.3.0.0)</td><td align="right" class="titleTableTopNav"><a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../package-summary.html">All&nbsp;Packages</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../all-classes.html')" href="../../../../class-summary.html">All&nbsp;Classes</a>&nbsp;|&nbsp;<a onclick="loadClassListFrame('../../../../index-list.html')" href="../../../../all-index-A.html">Index</a>&nbsp;|&nbsp;<a href="../../../../index.html?com/sony/jp/felica/MobileFeliCaRequest.html&amp;com/sony/jp/felica/class-list.html" id="framesLink1">Frames</a><a onclick="parent.location=document.location" href="" style="display:none" id="noFramesLink1">No&nbsp;Frames</a></td><td rowspan="3" align="right" class="titleTableLogo"><img alt="Adobe Logo" title="Adobe Logo" class="logoImage" src="../../../../images/logo.jpg"></td>
+</tr>
+<tr class="titleTableRow2">
+<td align="left" id="subTitle" class="titleTableSubTitle">Class&nbsp;MobileFeliCaRequest</td><td align="right" id="subNav" class="titleTableSubNav"><a href="#propertySummary">Properties</a>&nbsp;| <a href="#methodSummary">Methods</a>&nbsp;| <a href="#constantSummary">Constants</a></td>
+</tr>
+<tr class="titleTableRow3">
+<td colspan="2">&nbsp;</td>
+</tr>
+</table>
+<script type="text/javascript" language="javascript">
+<!--
+if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Class MobileFeliCaRequest"); titleBar_setSubNav(true,true,false,false,false,false,true,false,false,false,false,false,false,false);}
+--></script>
+<div class="MainContent">
+<table cellspacing="0" cellpadding="0" class="classHeaderTable">
+<tr>
+<td class="classHeaderTableLabel">Package</td><td><a onclick="javascript:loadClassListFrame('class-list.html')" href="package-detail.html">com.sony.jp.felica</a></td>
+</tr>
+<tr>
+<td class="classHeaderTableLabel">Class</td><td class="classSignature">public class MobileFeliCaRequest</td>
+</tr>
+<tr>
+<td class="classHeaderTableLabel">Inheritance</td><td class="inheritanceList">MobileFeliCaRequest <img class="inheritArrow" alt="Inheritance" title="Inheritance" src="../../../../images/inherit-arrow.gif"> com.sony.jp.felica.AbstractFeliCaAccess</td>
+</tr>
+</table>
+<p></p>
+  携帯電話のブラウザ起動、フリー領域へアクセス、iアプリ起動のリクエスト.
+  
+  <p>
+  MobileFeliCaRequest はおサイフケータイに対して以下の動作をFeliCaを通して要求する
+  リクエストです。
+  <ul>
+  <li>指定したURLのブラウザ表示</li>
+  <li>指定したiアプリ起動</li>
+  <li>フリー領域へのアクセス(ドコモのみ)</li>
+  </ul>
+  
+  おサイフケータイの種類によって、機能に対応していない場合があります。対応状況は
+  各携帯電話キャリアの技術資料を参照してください。
+  </p>
+  
+  <p>
+  ブラウザ表示を行う場合、type プロパティに MobileFeliCaRequest.WEBTO を指定し、url プロパティに起動する URL を
+  指定してください。
+  </p>
+  <p>
+  指定したiアプリ起動を行う場合、type プロパティに MobileFeliCaRequest.IAPPLI を指定し、url プロパティにiアプリの
+  URLを、adf プロパティに iアプリのADFの AllowPushBy の値を指定してください。(ADF は iアプリ開発時に設定されます。)
+  </p>
+  <p>
+  フリー領域へ読み書きを行う場合、type プロパティに MobileFeliCaRequest.READ か MobileFeliCaRequest.WRITE を
+  指定し、cpid プロパティに FeliCa CPIDを、pin プロパティに FeliCa PIN を指定してください。
+  (FeliCa CPID、FeliCa PIN は iアプリ開発時に設定されます。)
+  </p>
+  <p>
+  フリー領域への読み書きを行った後、iアプリを起動するためには、type プロパティに MobileFeliCaRequest.READ_WITH_IAPPLI か 
+  MobileFeliCaRequest.WRITE_WITH_IAPPLI を指定します。
+  </p>
+  <p></p>
+<p>
+<span class="classHeaderTableLabel">See also</span>
+</p>
+<div class="seeAlso">
+<a href="MobileFeliCaResponse.html" target="">MobileFeliCaResponse</a>
+</div>
+<br>
+<hr>
+</div>
+<a name="propertySummary"></a>
+<div class="summarySection">
+<div class="summaryTableTitle">Public Properties</div>
+<table id="summaryTableProperty" class="summaryTable " cellpadding="3" cellspacing="0">
+<tr>
+<th>&nbsp;</th><th colspan="2">Property</th><th class="summaryTableOwnerCol">Defined&nbsp;by</th>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#adf">adf</a> : String<div class="summaryTableDescription">
+   起動する i アプリの AllowPushBy を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#cpid">cpid</a> : String<div class="summaryTableDescription">
+   フリー領域の FeliCa CPID を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#data">data</a> : String<div class="summaryTableDescription">
+   フリー領域へ書き込むデータ(16進数表記)を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#pin">pin</a> : String<div class="summaryTableDescription">
+   アクセスするフリー領域の PIN 情報を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#type">type</a> : uint<div class="summaryTableDescription">
+   FeliCa へのアクセス方法を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#url">url</a> : String<div class="summaryTableDescription">
+   起動する i アプリの URL もしくは ブラウザで起動する URL を示します.</div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+</table>
+</div>
+<a name="methodSummary"></a>
+<div class="summarySection">
+<div class="summaryTableTitle">Public Methods</div>
+<table id="summaryTableMethod" class="summaryTable " cellpadding="3" cellspacing="0">
+<tr>
+<th>&nbsp;</th><th colspan="2">Method</th><th class="summaryTableOwnerCol">Defined&nbsp;by</th>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#MobileFeliCaRequest()">MobileFeliCaRequest</a>()</div>
+<div class="summaryTableDescription">
+   携帯電話のフリー領域へアクセス情報クラスのインスタンスを集約します。
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+</table>
+</div>
+<a name="constantSummary"></a>
+<div class="summarySection">
+<div class="summaryTableTitle">Public Constants</div>
+<table id="summaryTableConstant" class="summaryTable " cellpadding="3" cellspacing="0">
+<tr>
+<th>&nbsp;</th><th colspan="2">Constant</th><th class="summaryTableOwnerCol">Defined&nbsp;by</th>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#IAPPLI">IAPPLI</a> : uint = 3<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.IAPPLI 定数は、iアプリを起動する場合、type プロパティの値を定義します。 
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#READ">READ</a> : uint = 1<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.READ 定数は、フリー領域への読み込みを行う場合、type プロパティの値を定義します。 
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#READ_WITH_IAAPLI">READ_WITH_IAAPLI</a> : uint = 5<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.READ_WITH_IAAPLI 定数は、フリー領域への読み込みを行ってからiアプリを起動する場合、type プロパティの値を定義します。
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#WEBTO">WEBTO</a> : uint = 4<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.WEBTO 定数は、Web ブラウザを起動する場合、type プロパティの値を定義します。
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#WRITE">WRITE</a> : uint = 2<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.WRITE 定数は、フリー領域への書き込みを行う場合、type プロパティの値を定義します。 
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol"><a class="signatureLink" href="#WRITE_WITH_IAPPLI">WRITE_WITH_IAPPLI</a> : uint = 6<div class="summaryTableDescription">[static]
+   MobileFeliCaRequest.WRITE_WITH_IAPPLI 定数は、フリー領域への書き込みを行ってからiアプリを起動する場合、type プロパティの値を定義します。
+   </div>
+</td><td class="summaryTableOwnerCol">MobileFeliCaRequest</td>
+</tr>
+</table>
+</div>
+<script type="text/javascript" language="javascript">
+<!--
+showHideInherited();
+--></script>
+<div class="MainContent">
+<a name="propertyDetail"></a>
+<div class="detailSectionHeader">Property detail</div>
+<a name="adf"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">adf</td><td class="detailHeaderType">property</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>adf:String</code>&nbsp;&nbsp;[read-write]<p>
+   起動する i アプリの AllowPushBy を示します.
+   
+   </p><p>ADF のAllowPushBy に "icc:<起動コマンド>" の形式でしたときの、<起動コマンド>の文字列を
+   指定してください。</p> 
+   
+   <p>
+   指定する文字列長は6でなければいけません。
+   </p>
+   
+   <p>type プロパティが IAPPLI、READ_WITH_IAPPLI もしくは WRITE_WITH_IAPPLI の場合にこのプロパティを
+   設定してください。</p>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get adf():String</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set adf(value:String):void</code>
+<br>
+</div>
+<a name="cpid"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">cpid</td><td class="detailHeaderType">property</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>cpid:String</code>&nbsp;&nbsp;[read-write]<p>
+   フリー領域の FeliCa CPID を示します.
+   
+   </p><p>CPID は 16バイト分の16進文字列(文字数長=32)です。type プロパティが READ、WRITE、
+   READ_WITH_IAPPLI もしくは WRITE_WITH_IAPPLI の場合にこのプロパティを設定してください。</p>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get cpid():String</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set cpid(value:String):void</code>
+<br>
+</div>
+<a name="data"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">data</td><td class="detailHeaderType">property</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>data:String</code>&nbsp;&nbsp;[read-write]<p>
+   フリー領域へ書き込むデータ(16進数表記)を示します.
+   
+   </p><p>64 byte 分の16進文字列(文字列長=128)を指定してください。</p>
+   <p>type プロパティが WRITE もしくは WRITE_WITH_IAPPLI の場合にこのプロパティを設定してください。</p>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get data():String</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set data(value:String):void</code>
+<br>
+</div>
+<a name="pin"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">pin</td><td class="detailHeaderType">property</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>pin:String</code>&nbsp;&nbsp;[read-write]<p>
+   アクセスするフリー領域の PIN 情報を示します.
+   
+   </p><p>type プロパティが READ、WRITE、READ_WITH_IAPPLI もしくは WRITE_WITH_IAPPLI の場合にこのプロパティを
+   設定してください。</p>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get pin():String</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set pin(value:String):void</code>
+<br>
+</div>
+<a name="type"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">type</td><td class="detailHeaderType">property</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>type:uint</code>&nbsp;&nbsp;[read-write]<p>
+   FeliCa へのアクセス方法を示します.
+   </p><p>
+   以下の定数を指定できます。
+   <ul>
+   <li>MobileFeliCaRequest.READ</li>
+   <li>MobileFeliCaRequest.WRITE</li>
+   <li>MobileFeliCaRequest.IAPPLI</li>
+   <li>MobileFeliCaRequest.WEBTO</li>
+   <li>MobileFeliCaRequest.READ_WITH_IAAPLI</li>
+   <li>MobileFeliCaRequest.WRITE_WITH_IAPPLI</li>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get type():uint</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set type(value:uint):void</code>
+<br>
+</div>
+<a name="url"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">url</td><td class="detailHeaderType">property</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>url:String</code>&nbsp;&nbsp;[read-write]<p>
+   起動する i アプリの URL もしくは ブラウザで起動する URL を示します.
+   
+   </p><p>type プロパティが IAPPLI、READ_WITH_IAPPLI、WRITE_WITH_IAPPLI もしくは WEBTO の場合にこのプロパティを
+   設定してください。</p>
+   <span class="label">Implementation</span>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function get url():String</code>
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;public function set url(value:String):void</code>
+<br>
+</div>
+<a name="constructorDetail"></a>
+<div class="detailSectionHeader">Constructor detail</div>
+<a name="MobileFeliCaRequest()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">MobileFeliCaRequest</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">constructor</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function MobileFeliCaRequest()</code><p>
+   携帯電話のフリー領域へアクセス情報クラスのインスタンスを集約します。
+   </p></div>
+<a name="constantDetail"></a>
+<div class="detailSectionHeader">Constant detail</div>
+<a name="IAPPLI"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">IAPPLI</td><td class="detailHeaderType">constant</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const IAPPLI:uint = 3</code><p>
+   MobileFeliCaRequest.IAPPLI 定数は、iアプリを起動する場合、type プロパティの値を定義します。 
+   </p></div>
+<a name="READ"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">READ</td><td class="detailHeaderType">constant</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const READ:uint = 1</code><p>
+   MobileFeliCaRequest.READ 定数は、フリー領域への読み込みを行う場合、type プロパティの値を定義します。 
+   </p></div>
+<a name="READ_WITH_IAAPLI"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">READ_WITH_IAAPLI</td><td class="detailHeaderType">constant</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const READ_WITH_IAAPLI:uint = 5</code><p>
+   MobileFeliCaRequest.READ_WITH_IAAPLI 定数は、フリー領域への読み込みを行ってからiアプリを起動する場合、type プロパティの値を定義します。
+   </p></div>
+<a name="WEBTO"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">WEBTO</td><td class="detailHeaderType">constant</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const WEBTO:uint = 4</code><p>
+   MobileFeliCaRequest.WEBTO 定数は、Web ブラウザを起動する場合、type プロパティの値を定義します。
+   </p></div>
+<a name="WRITE"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">WRITE</td><td class="detailHeaderType">constant</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const WRITE:uint = 2</code><p>
+   MobileFeliCaRequest.WRITE 定数は、フリー領域への書き込みを行う場合、type プロパティの値を定義します。 
+   </p></div>
+<a name="WRITE_WITH_IAPPLI"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">WRITE_WITH_IAPPLI</td><td class="detailHeaderType">constant</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static const WRITE_WITH_IAPPLI:uint = 6</code><p>
+   MobileFeliCaRequest.WRITE_WITH_IAPPLI 定数は、フリー領域への書き込みを行ってからiアプリを起動する場合、type プロパティの値を定義します。
+   </p></div>
+<br>
+<br>
+<hr>
+<br>
+<p></p>
+<center class="copyright">Copyright 2009,2010,2011 Sony Corporation</center>
+</div>
+</body>
+</html>
+<!--Copyright 2009,2010,2011 Sony Corporation-->

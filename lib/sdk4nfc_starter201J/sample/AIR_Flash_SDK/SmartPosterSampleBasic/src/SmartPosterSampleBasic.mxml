@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2009,2010,2011 Sony Corporation -->
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="345" height="460" title="SmartPosterSampleBasic">
+	<mx:TabNavigator x="10" y="10" width="323" height="369" tabIndex="1" fontSize="12">
+		<mx:Canvas label="SmartPoster" width="100%" height="100%">
+			<mx:Label x="10" y="45" text="Abbreviation:" fontSize="12"/>
+			<mx:Label x="10" y="75" text="URL:" width="79" fontSize="12"/>
+			<mx:ComboBox x="97" y="43" width="214" dataProvider ="{abbreviationTable}" labelField="protocol" id="cmbAbbreviation" tabIndex="4" fontSize="12"></mx:ComboBox>
+			<mx:TextInput x="97" y="73" width="214" id="txtURIInput" maxChars="150" tabIndex="5" fontSize="12"/>
+			<mx:Label x="10" y="105" text="Title:" width="79" fontSize="12"/>
+			<mx:TextInput x="97" y="103" width="214" id="txtTitleInput" maxChars="20" tabIndex="6" fontSize="12"/>
+			<mx:Button x="10" y="10" label="Write" width="79" click="onWriteClick();" id="btnWrite" tabIndex="3" fontSize="12"/>
+			<mx:VBox x="10" y="186" width="301" height="140">
+				<mx:Label text="Log" fontSize="12"/>
+				<mx:TextArea width="100%" height="105" id="txtLogArea" editable="false" tabIndex="7"/>
+			</mx:VBox>
+		</mx:Canvas>
+	</mx:TabNavigator>
+	<mx:Label x="10" y="386" width="323" text="Copyright 2009,2010,2011 Sony Corporation" height="22" fontSize="12"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import com.sony.jp.felica.*;
+			import com.sony.jp.felica.event.*;
+			import com.sony.jp.felica.error.*;
+
+			// NFC Forum defines more protocol abbreviations, but we list only those that are typically used.
+			private static const abbreviationTable:Array = [
+				{index:1, protocol:"http://www"},
+				{index:2, protocol:"https://www"},
+				{index:3, protocol:"http://"},
+				{index:4, protocol:"https://"},
+			];
+
+			private var fc:FeliCaControl = new FeliCaControl();	
+
+			private var funcList:Array = new Array;
+
+			private function onOpenComplete(evt:OpenStatusEvent):void
+			{
+				displayMessage("NFCProxy との認証に成功しました。");
+				var nextFunc:Function = funcList.shift();
+				nextFunc();
+			}
+			
+			//	NFCProxy との認証処理でエラー発生時
+			private function onOpenFailure(evt:OpenStatusEvent):void
+			{
+				var error:Error	= evt.object as Error;
+				displayMessage(	"NFCProxy との相互認証に失敗しました。\n" +
+								"   ERROR : (" + error.errorID + ") " + error.message);
+			}
+
+			//	FeliCa アクセス成功時
+			private function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{	
+				displayMessage("成功しました。");
+
+				if (funcList.length == 0) {
+					closeNFCProxy();	
+				} else {
+					var nextFunc:Function = funcList.shift();
+					nextFunc();
+				}
+			}
+			
+			//	FeliCa アクセス失敗時
+			private function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				var errorMsg:String;
+				if (evt.object is FeliCaAccessError)
+				{
+					var error1:FeliCaAccessError = evt.object as FeliCaAccessError;
+					errorMsg =	"   ERROR: (" + error1.errorID + ")" + error1.message + "\n" +
+								"     FeliCa Error Code (" + error1.felicaError + ")\n" +
+								"     RW Error Code (" + error1.rwError + ")\n" +
+								"     NFCProxy Error Code (" + error1.felicaProxyError + ")";
+				}
+				else if (evt.object is Error)
+				{
+					var error2:Error = evt.object as Error;
+					errorMsg = "   ERROR : (" + error2.errorID + ") " + error2.message;
+				}
+				
+				displayMessage("FeliCa アクセスに失敗しました\n" + errorMsg);
+				
+				//	NFCProxy の切断
+				closeNFCProxy();
+			}
+			
+			//	FeliCa アクセスパラメータ設定エラー発生時
+			private function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error	= evt.object as Error;
+				displayMessage(	"FeliCa アクセスでパラメータエラーが発生しました。\n" +
+										"   ERROR: (" + error.errorID + ")" + error.message);
+				
+				//	NFCProxy の切断
+				closeNFCProxy();
+			}
+			
+			//	NFCProxy の切断
+			private function closeNFCProxy():void
+			{
+				if (fc.close())
+				{
+					displayMessage("NFCProxy との接続を切断しました。");	
+				}
+				else
+				{
+					displayMessage("NFCProxy との接続を切断に失敗しました。");
+				}
+			}
+			
+			private function lock():void
+			{
+				displayMessage("リーダ／ライタの占有...");
+				//	リーダ／ライタを占有する為の情報の設定
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();
+				
+				request.type			= FeliCaSessionRequest.HOLD;	// リーダ・ライタ占有要求
+				request.lockTimeout		= 10;							// 占有(Lock)するまでのタイムアウト時間(秒)
+				request.unlockTimeout	= 60;							// 占有(Lock)してから解放(Unlock)するまでの見込み時間(秒) 
+																		// NFCProxyは、このunlockTimeout時間経過した場合自動でR/W解放を行う。
+				
+				//	リーダ／ライタ占有を実行
+				fc.access(request);
+			}
+			
+			//	リーダ／ライタ占有の解放を実行
+			private function unlock():void
+			{
+				displayMessage("リーダ／ライタの解放...");
+				//	リーダ／ライタ占有を解放する為の情報の設定
+				var request:FeliCaSessionRequest = new FeliCaSessionRequest();
+				
+				request.type = FeliCaSessionRequest.RELEASE;	// リーダ・ライタ解放要求
+				
+				//	リーダ／ライタ占有解放を実行
+				fc.access(request);
+			}		
+			
+			private function onWriteClick():void
+			{
+				funcList.push(lock);
+				funcList.push(open);
+				funcList.push(polling);
+				funcList.push(writeSmartPoster);
+				funcList.push(unlock);
+
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				fc.open(10250);
+			}
+			
+			private function open():void
+			{
+				displayMessage("リーダ／ライタのオープン...");
+				var request:FeliCaOpenReaderWriterAutoRequest
+					= new FeliCaOpenReaderWriterAutoRequest;
+				fc.access(request);	
+			}
+			
+			private function polling():void
+			{
+				displayMessage("カードの捕捉...");
+				var request:FeliCaPollingAndGetCardInformationRequest
+					= new FeliCaPollingAndGetCardInformationRequest;
+				request.systemCode = "ffff";
+				fc.access(request);	
+			}
+			
+			private function writeSmartPoster():void
+			{
+				var stBlockData:String = "";
+				this.displayMessage("Smart Poster書き込み...");
+				var request:NFCType3TagRequest = new NFCType3TagRequest();
+				request.type = NFCType3TagRequest.WRITE;
+				request.data = makeSmartPosterRecord(txtURIInput.text, txtTitleInput.text, cmbAbbreviation.selectedItem.index);;
+				fc.access(request);
+				stBlockData = "";					
+			} 			
+			
+			/**
+			 * This function makes a Smart Poster Record in accordance with the specification
+			 * defined by NFC Forum.  Please refer to the official documentations from NFC Forum
+			 * for the detail.
+			 */
+			private function makeSmartPosterRecord(uri:String, title:String, abbreviation:uint):String
+			{			
+				var textRecord:String = makeTextRecord(title, "ja");
+				var uriRecord:String = makeURIRecord(uri, abbreviation);
+				
+				// The record starts with (MB = 1, ME = 1, CF = 0, SR = 1, IL = 0, TNF = 001)
+				var data:String = "D1";
+				
+				// The record name length (sp)
+				data += "02";
+								
+				// The length of Smart Poster data
+				data += uintToHexStr(textRecord.length / 2 + uriRecord.length / 2);
+
+				// The record name ("Sp")
+				data += strToHexStr("Sp");
+				
+				// Append Smart Poster data
+				data += (textRecord + uriRecord);
+				
+				return data;
+			}
+			
+			
+			private function makeTextRecord(text:String, langCode:String, isFirst:Boolean=true, isLast:Boolean=false):String
+			{
+				var data:String = "";
+				// The record starts with (CF = 0, SR = 1, IL = 0, TNF = 001), MB and ME bits are
+				// defined by the arguments.
+				if (isFirst) {
+					if (isLast) {	
+						data += "D1";
+					} else if (!isLast) {
+						data += "91";
+					}
+				} else if (!isFirst) {
+					if (isLast) {	
+						data += "51";
+					} else if (!isLast) {
+						data += "11";
+					}					
+				}
+				
+				// Record name length = 1 ("T")
+				data += "01";
+				
+				// The payload length
+				data += uintToHexStr(1 + langCode.length + text.length);
+				
+				// Record type = "T"
+				data += strToHexStr("T");
+				
+				// The length of language code
+				data += uintToHexStr(langCode.length);
+				
+				// Language code
+				data += strToHexStr(langCode);
+				
+				// The text
+				data += strToHexStr(text);
+					
+				return data;
+			}
+			
+						
+			private function makeURIRecord(uri:String, abbreviation:uint, isFirst:Boolean=false, isLast:Boolean=true):String
+			{
+				var data:String = "";
+				// The record starts with (CF = 0, SR = 1, IL = 0, TNF = 001), MB and ME bits are
+				// defined by the arguments.
+				if (isFirst) {
+					if (isLast) {	
+						data += "D1";
+					} else if (!isLast) {
+						data += "91";
+					}
+				} else if (!isFirst) {
+					if (isLast) {	
+						data += "51";
+					} else if (!isLast) {
+						data += "11";
+					}					
+				}
+				
+				// Record name length = 1 ("U")
+				data += "01";
+				
+				// The payload length
+				data += uintToHexStr(1 + uri.length);
+				
+				// Record type = "U"
+				data += strToHexStr("U");
+				
+				// Abbreviation (e.g. "http://" and "http://www")
+				data += uintToHexStr(abbreviation);
+				
+				// The URI itself
+				data += strToHexStr(uri);
+			
+				return data;	
+			}
+
+			private function uintToHexStr(val:uint):String
+			{
+				if (val > 0xff) {
+					val = 0xff;	
+				}
+				
+				var str:String = val.toString(16);
+				if (str.length == 1) {
+					str = "0" + str;	
+				}
+				
+				return str;
+			}
+			
+			private function strToHexStr(str:String):String
+			{
+				var ba:ByteArray = new ByteArray;
+				ba.writeUTFBytes(str);
+				var hexStr:String = "";
+				for (var i:uint = 0; i < ba.length; i++) {
+					hexStr += ("0" + ba[i].toString(16)).substr(-2, 2);	
+				}
+				
+				return hexStr;	
+			}
+
+			
+			private function displayMessage(msg:String):void
+			{
+				this.txtLogArea.text += msg;
+				this.txtLogArea.text += "\n";
+			}	
+		]]>
+	</mx:Script>
+</mx:WindowedApplication>

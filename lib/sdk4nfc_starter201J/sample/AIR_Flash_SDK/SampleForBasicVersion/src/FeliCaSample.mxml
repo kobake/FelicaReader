@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="786" height="484" xmlns:sampleView="*">
+	<mx:Label x="10" y="10" text="[SDK for FeliCa &amp; Adobe AIR/Adobe Flash - Basic] Sample"/>
+	<mx:VBox x="0" y="28" height="456" width="100%" horizontalAlign="center">
+		<mx:HRule width="100%"/>
+		<sampleView:CommonView id="commonView" />
+		<mx:HRule width="100%"/>
+		<sampleView:ExecView id="execView"  height="373"/>
+	</mx:VBox>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.FeliCaControl;
+			
+			//	NFCProxy との通信を行うコントロールクラス
+			//		各実行画面にてこのコントロールクラスを使用して NFCProxy と通信を行う
+			public var fc:FeliCaControl = new FeliCaControl();
+		]]>
+	</mx:Script>
+</mx:Application>

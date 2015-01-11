@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2010 Sony Corporation -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="init()" 
+	width="0" height="0" visible="false" xmlns:local="*">
+	<mx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			import flash.external.ExternalInterface;
+			import com.sony.jp.felica.*;
+			import com.sony.jp.felica.event.*;
+
+			private var fc:FeliCaControl = new FeliCaControl();
+			private var callback:String = "";
+			private var _url:String = "";
+			
+			private var mode:Number = NONE;
+			private static const NONE:Number = 0;
+			private static const POLLING:Number = 1;
+			private static const PUSH:Number = 2;
+			
+			private var _error:uint = NO_ERROR;
+			public static const NO_ERROR:uint = 0;
+			public static const PROXY_CONNECTION_ERROR:uint = 1;
+			public static const OPEN_RW_ERROR:uint = 2;
+			public static const POLLING_ERROR:uint = 3;
+			public static const READ_ERROR:uint = 4;
+			public static const PUSH_ERROR:uint = 5
+			public static const INTERNAL_ERROR:uint = 6;
+			
+			private function init():void {
+				ExternalInterface.addCallback("polling", extPolling);
+				ExternalInterface.addCallback("push", extPush);
+			}
+			
+			private function extPolling(callbackFunc:String):void {
+				mode = POLLING;
+				callback = callbackFunc;
+				start();
+			}
+
+			private function extPush(url:String, callbackFunc:String):void {
+				mode = PUSH;
+				_url = url;
+				callback = callbackFunc;
+				start();
+
+			}
+			
+			private function start():void
+			{
+				fc.addEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.addEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+				fc.open(10250);
+			}
+			
+			private function onOpenComplete(evt:OpenStatusEvent):void 
+			{
+				fc.removeEventListener(OpenStatusEvent.OPEN_COMPLETE, onOpenComplete);
+				fc.removeEventListener(OpenStatusEvent.OPEN_FAILURE, onOpenFailure);
+
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onAccessComplete);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onAccessFailure);
+				fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onParameterError);	
+				
+				if (mode == POLLING) {
+					var request:FeliCaOpenReaderWriterAutoRequest = new FeliCaOpenReaderWriterAutoRequest;
+					fc.access(request);
+				} else if (mode == PUSH) {
+					var pushRequest:MobileFeliCaRequest = new MobileFeliCaRequest;
+					pushRequest.url = _url;
+					pushRequest.type = MobileFeliCaRequest.WEBTO;
+					fc.access(pushRequest);	
+				}
+			}
+
+			private function onOpenFailure(evt:OpenStatusEvent):void 
+			{
+				if (mode == POLLING) {
+					callbackPolling(PROXY_CONNECTION_ERROR, null, null);	
+				} else if (mode == PUSH) {
+					callbackPush(PROXY_CONNECTION_ERROR);	
+				}
+				fc.close();
+			}
+			
+			private function onAccessComplete(evt:FeliCaStatusEvent):void 
+			{
+				if (mode == POLLING) {
+					if (evt.object is FeliCaOpenReaderWriterAutoResponse) {
+						var request:FeliCaPollingAndGetCardInformationRequest
+							= new FeliCaPollingAndGetCardInformationRequest;
+						request.systemCode = "ffff";
+						fc.access(request);
+					} else if (evt.object is FeliCaPollingAndGetCardInformationResponse) {
+						var response:FeliCaPollingAndGetCardInformationResponse =
+							evt.object as FeliCaPollingAndGetCardInformationResponse;
+						var idm:String = response.idm;
+						var pmm:String = response.pmm;
+						callbackPolling(NO_ERROR, idm, pmm);
+						clean();
+					}
+				} else if (mode == PUSH) {
+					callbackPush(NO_ERROR);
+					clean();
+				}
+			}			
+
+			private function callbackPolling(status:uint, idm:String, pmm:String):void {
+				var calling:String = "javascript:" + callback + "('" + status + "','" + idm + "','" + pmm + "')";
+				var req:URLRequest = new URLRequest(calling);
+				navigateToURL(req, "_self");
+			}
+
+			private function callbackPush(status:uint):void {
+				var calling:String = "javascript:" + callback + "('" + status + "')";
+				var req:URLRequest = new URLRequest(calling);
+				navigateToURL(req, "_self");
+			}
+
+
+			private function clean():void {
+				fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onAccessComplete);
+				fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onAccessFailure);
+				fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onParameterError);	
+				fc.close();	
+			}
+
+			private function onAccessFailure(evt:FeliCaStatusEvent):void 
+			{
+				if (mode == POLLING) {
+					callbackPolling(POLLING_ERROR, null, null);	
+				} else if (mode == PUSH) {
+					callbackPush(PUSH_ERROR);	
+				}
+				fc.close();
+			}	
+
+			private function onParameterError(evt:FeliCaStatusEvent):void 
+			{
+				if (mode == POLLING) {
+					callbackPolling(INTERNAL_ERROR, "", "");	
+				} else if (mode == PUSH) {
+					callbackPush(INTERNAL_ERROR);	
+				}
+				fc.close();
+			}
+		]]>
+	</mx:Script>
+</mx:Application>

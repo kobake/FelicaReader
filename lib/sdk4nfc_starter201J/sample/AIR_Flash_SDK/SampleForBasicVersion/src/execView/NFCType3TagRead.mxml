@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" label="NFCType3TagRead" width="545" height="354" backgroundColor="#FFFFFF">
+	<!-- 設定用テキストインプット -->
+	<mx:Button x="10" y="10" label="実行" id="btnExecute" click="onExecute()" width="85"/>
+	
+	<mx:HRule x="0" y="40" width="100%"/>
+	
+	<!-- 実行結果表示用 -->
+	<mx:Label x="10" y="52" text="IDm" fontSize="10"/>
+	<mx:TextInput x="58" y="50" fontSize="10" width="152" id="txtIDm" editable="false"/>
+	<mx:Label x="218" y="52" text="PMm"/>
+	<mx:TextInput x="255" y="51" fontSize="10" width="152" id="txtPMm" editable="false"/>
+	<mx:Label x="415" y="53" text="有効データ長"/>
+	<mx:TextInput x="481" y="51" fontSize="10" width="54" id="txtActualBlockDataSize" editable="false"/>
+	
+	<mx:VBox x="10" y="78" height="111" width="525">
+		<mx:HBox width="100%">
+			<mx:Label text="Data"/>
+			<mx:CheckBox label="ASCII表記" id="chkDataAscii" click="onChangeData()" selected="false"/>
+		</mx:HBox>
+		<mx:TextArea width="100%" height="82" id="txtDataArea" editable="false"/>
+	</mx:VBox>
+	
+	<mx:HBox x="10" y="197" width="525">
+		<mx:Label text="ステータスフラグ１"/>
+		<mx:TextArea height="19" width="52" textAlign="right" id="txtStatusFlag1" editable="false" wordWrap="false"/>
+		<mx:Label text="ステータスフラグ２"/>
+		<mx:TextArea width="52" height="19" textAlign="right" id="txtStatusFlag2" wordWrap="false" editable="false"/>
+	</mx:HBox>
+	<mx:HBox x="10" y="223" width="525">
+		<mx:Label text="felica error code" width="96"/>
+		<mx:TextArea height="19" width="36" textAlign="right" id="txtFeliCaErrorCode" editable="false" wordWrap="false"/>
+		<mx:Label text="rw error code"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtRWErrorCode" wordWrap="false" editable="false"/>
+		<mx:Label text="NFC Proxy error code" width="133"/>
+		<mx:TextArea width="36" height="19" textAlign="right" id="txtNFCProxyErrorCode" wordWrap="false" editable="false"/>
+	</mx:HBox>
+	
+	<!-- ログ表示用 -->
+	<mx:VBox x="10" y="250" height="94" width="525">
+		<mx:Label text="Log"/>
+		<mx:TextArea width="100%" height="56" id="txtLogArea" editable="false" />
+	</mx:VBox>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.sony.jp.felica.NFCType3TagRequest;
+			import com.sony.jp.felica.NFCType3TagResponse;
+			import com.sony.jp.felica.event.FeliCaStatusEvent;
+			import com.sony.jp.felica.error.FeliCaAccessError;
+			
+			import util.Util;
+			
+			//	チェックボックスがクリックされた時
+			protected function onChangeData():void
+			{
+				util.Util.changeData(this.chkDataAscii, this.txtDataArea);
+			}
+			
+			//	[実行] ボタン押下時処理
+			protected function onExecute():void
+			{
+				//	実行結果の情報をクリア
+				this.txtIDm.text					= "";
+				this.txtPMm.text					= "";
+				this.txtDataArea.text				= "";
+				this.txtStatusFlag1.text			= "";
+				this.txtStatusFlag2.text			= "";
+				this.txtFeliCaErrorCode.text		= "";
+				this.txtRWErrorCode.text			= "";
+				this.txtNFCProxyErrorCode.text	= "";
+				
+				//	リスナーの登録
+				this.configureEventListeners(true);
+				
+				//	NFC Type3 Tag のデータを読み込みする為の情報の設定
+				var request:NFCType3TagRequest = new NFCType3TagRequest();
+				
+				request.type	= NFCType3TagRequest.READ;		// NFC Type3 Tag のデータを読み込むときのプロパティ
+				
+				//	ログの表示
+				this.displayMessage("NFC Type3 Tag のデータ読み込みを実行します。");
+				
+				//	NFC Type3 Tag のデータを読み込みを実行
+				FeliCaSample(parentDocument.parentDocument).fc.access(request);
+			}
+			
+			//	FeliCa アクセス完了時
+			protected function onFeliCaAccessComplete(evt:FeliCaStatusEvent):void
+			{
+				var response:NFCType3TagResponse = evt.object as NFCType3TagResponse;
+				
+				//	idm, pmm, 有効データ長 の表示
+				this.txtIDm.text					= response.idm;
+				this.txtPMm.text					= response.pmm;
+				this.txtActualBlockDataSize.text	= response.data.length.toString();
+				
+				//	データを表示
+				if (response.data.length != 0)
+				{
+					this.txtDataArea.text = response.data;
+					
+					//	[ASCII表記] チェックボックスが選択されている場合は、データを ASCII 表示にする
+					if (this.chkDataAscii.selected == true)
+					{
+						this.onChangeData();
+					}				
+				}
+				
+				//	ステータスフラグの表示
+				this.txtStatusFlag1.text			= response.statusFlag1.toString();
+				this.txtStatusFlag2.text			= response.statusFlag2.toString();
+				
+				//	エラーコードの表示
+				this.txtFeliCaErrorCode.text		= response.felicaError.toString();		// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+				this.txtRWErrorCode.text			= response.rwError.toString();			// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+				this.txtNFCProxyErrorCode.text	= response.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+				
+				//	ログの表示
+				this.displayMessage("NFC Type3 Tag のデータ読み込みに成功しました。");
+				this.displayMessage("  idm          = " + response.idm);
+				this.displayMessage("  pmm          = " + response.pmm);
+				this.displayMessage("  data = ");
+				for (var i:uint=0; i < response.data.length; i +=(16*2))
+				{
+					this.displayMessage("         " + response.data.substring(i, (i+(16*2))));						
+				}
+				this.displayMessage("  felica error = " + response.felicaError.toString());
+				this.displayMessage("  rw error = " + response.rwError.toString());
+				this.displayMessage("  proxy error = " + response.felicaProxyError.toString());
+				
+				//	リスナーの削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行失敗時
+			protected function onFeliCaAccessFailure(evt:FeliCaStatusEvent):void
+			{
+				if (evt.object is FeliCaAccessError)
+				{
+					var accessErr:FeliCaAccessError = evt.object as FeliCaAccessError;
+					
+					//	ステータスフラグの表示
+					this.txtStatusFlag1.text			= accessErr.statusFlag1.toString();
+					this.txtStatusFlag2.text			= accessErr.statusFlag2.toString();
+					
+					//	エラーコードの表示
+					this.txtFeliCaErrorCode.text		= accessErr.felicaError.toString();			// FeliCaライブラリでエラーが発生した場合に felica_error がセットされます。正常時は 0
+					this.txtRWErrorCode.text			= accessErr.rwError.toString();				// FeliCaライブラリでエラーが発生した場合に rw_error がセットされます。正常時は 0
+					this.txtNFCProxyErrorCode.text	= accessErr.felicaProxyError.toString();	// NFCProxy内部でエラーが発生した場合に felica_proxy_error がセットされます。 正常時は 0
+					
+					//	ログの表示
+					this.displayMessage("NFC Type3 Tag のデータ読み込みに失敗しました。");
+					this.displayMessage("  status flag1 = " + accessErr.statusFlag1.toString());
+					this.displayMessage("  status flag2 = " + accessErr.statusFlag2.toString());
+					this.displayMessage("  ERROR : (" + accessErr.errorID + ") " + accessErr.message);
+					this.displayMessage("  felica error = " + accessErr.felicaError.toString());
+					this.displayMessage("  rw error     = " + accessErr.rwError.toString());
+					this.displayMessage("  proxy error  = " + accessErr.felicaProxyError.toString());
+				}
+				else if (evt.object is Error)
+				{
+					var error:Error = evt.object as Error;
+					
+					//	ログの表示
+					this.displayMessage("NFC Type3 Tag のデータ読み込みに失敗しました。");
+					this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				}
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセス実行時のパラメータエラー発生時
+			protected function onFeliCaAccessParameterError(evt:FeliCaStatusEvent):void
+			{
+				var error:Error = evt.object as Error;
+				
+				//	ログの表示
+				this.displayMessage("NFC Type3 Tag のデータ読み込みでエラーが発生しました。");
+				this.displayMessage("  ERROR : (" + error.errorID + ") " + error.message);
+				
+				//	リスナー削除
+				this.configureEventListeners(false);
+			}
+			
+			//	FeliCa アクセスで使用するイベントリスナーの登録・削除
+			private function configureEventListeners(addFlag:Boolean):void
+			{
+				if (addFlag == true)
+				{
+					//	リスナー登録
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.addEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				else
+				{
+					//	リスナー削除
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_COMPLETE, onFeliCaAccessComplete);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_FAILURE, onFeliCaAccessFailure);
+					FeliCaSample(parentDocument.parentDocument).fc.removeEventListener(FeliCaStatusEvent.FELICA_ACCESS_PARAMETER_ERROR, onFeliCaAccessParameterError);
+				}
+				
+				//	画面の使用可・不可の設定
+				FeliCaSample(parentDocument.parentDocument).enabled = (addFlag == true) ? false : true;
+			}
+			
+			//	ログの表示
+			private function displayMessage(msg:String):void
+			{
+				this.txtLogArea.text += msg;
+				this.txtLogArea.text += "\n";
+				
+				this.callLater(setScroll);	//	一番下にスクロールさせる
+			}
+			
+			//	ログエリアを一番下にスクロールさせる
+			private function setScroll():void
+			{
+				this.txtLogArea.verticalScrollPosition = this.txtLogArea.maxVerticalScrollPosition;
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>
